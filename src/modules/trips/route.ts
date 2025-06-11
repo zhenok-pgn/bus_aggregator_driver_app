@@ -1,5 +1,10 @@
-import type { IBaseObject } from '@/utils/baseObject'
+import type { ICarrier } from '../modules/organization/interfaces/carrier'
+import type { IBaseObject } from '../utils/baseObject'
+import type { ILocality } from './locality'
+import { DateOnly, TimeOnly } from '@/utils/dateTime'
+import { useAuthStore } from '@/modules/auth/stores/auth'
 
+//Короткая информация
 export interface IRouteSummary extends IBaseObject {
   name: string
   number: string
@@ -74,12 +79,55 @@ export interface ISchedulePattern extends IBaseObject {
   daysOfWeek: number
 }
 
-export interface ILocality extends IBaseObject {
-  name: string
-  region: string
-  country: string
-  district: string
-  osmId: string
-  timezone: string
-  offsetMinutes: number
+export const createBusStop = (order: number): IRouteStop => {
+  return {
+    busStop: {
+      id: crypto.randomUUID(),
+      name: '',
+      address: '',
+      latitude: 0,
+      longitude: 0,
+      locality: {
+        id: crypto.randomUUID(),
+        name: '',
+        osmId: '',
+        region: '',
+        country: '',
+        district: '',
+        timezone: '',
+        offsetMinutes: 0,
+      },
+    },
+    departureTime: new TimeOnly().toString(),
+    arrivalTime: new TimeOnly().toString(),
+    arrivalDayNumber: 0,
+    order: order,
+  }
+}
+
+export const createRouteSchedule = (): IRouteSchedule => {
+  {
+    return {
+      id: crypto.randomUUID(),
+      schedulePattern: {
+        id: crypto.randomUUID(),
+        startDate: new DateOnly().toString(),
+        endDate: new DateOnly().toString(),
+        daysOfWeek: 0,
+      },
+      departureTime: new TimeOnly().toString(),
+      routeSegmentSchedules: [],
+    }
+  }
+}
+
+export const createRoute = (): IRoute => {
+  return {
+    id: crypto.randomUUID(),
+    name: '',
+    number: '',
+    registrationNumber: '',
+    carrierId: useAuthStore().user.id,
+    routeSchedules: [],
+  }
 }

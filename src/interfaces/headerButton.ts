@@ -10,4 +10,5 @@ export interface IHeaderButton {
   name: string
   to: string | RouteLocationAsRelativeGeneric | RouteLocationAsPathGeneric
   type: headerButtonType
+  needDialog?: boolean
 }

@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '../stores/auth'
+import { useAuthStore } from '../modules/auth/stores/auth'
 import { headerButtonType, type IHeaderButton } from '@/interfaces/headerButton'
 
 const router = createRouter({
@@ -11,6 +11,7 @@ const router = createRouter({
       children: [
         {
           path: '',
+          name: 'home',
           component: () => import('../modules/home/views/HomeView.vue'),
           meta: { pageHeader: 'Главная' },
         },
@@ -30,15 +31,28 @@ const router = createRouter({
               component: () => import('../modules/trips/views/TripScheduleView.vue'),
             },
             {
-              path: 'details/:tripIdParam',
+              path: ':tripIdParam',
               name: 'trip-details',
               component: () => import('../modules/trips/views/TripDetailsView.vue'),
               props: true,
               meta: {
-                pageHeader: 'Информация о рейсе',
                 backButton: {
-                  name: 'назад к рейсам',
-                  to: '..',
+                  name: 'назад',
+                  to: '.',
+                  type: headerButtonType.back,
+                } as IHeaderButton,
+              },
+            },
+            {
+              path: ':tripIdParam/tracking',
+              name: 'trip-tracking',
+              component: () => import('../modules/trips/views/TripTrackingView.vue'),
+              props: true,
+              meta: {
+                pageHeader: 'Выполнение рейса',
+                backButton: {
+                  name: 'назад',
+                  to: { name: 'home' },
                   type: headerButtonType.back,
                 } as IHeaderButton,
               },
@@ -60,10 +74,21 @@ const router = createRouter({
 // check for authentication
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next('/login')
+  if (to.meta.requiresAuth) {
+    if (authStore.isAuthenticated) {
+      authStore
+        .fetchUser()
+        .then(() => next())
+        .catch(() => {
+          authStore.isAuthenticated = false
+          next('/login')
+        })
+    } else {
+      next('/login')
+    }
   } else if (to.meta.loginForm && authStore.isAuthenticated) {
-    next('/')
+    // Если авторизован и пытается на форму входа
+    next('/') // Возвращаем обратно или на главную
   } else {
     next()
   }

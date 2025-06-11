@@ -6,14 +6,14 @@
       </v-card-title>
       <v-card-text>
         <v-row>
-          <v-col cols="12" sm="6"> <strong>Имя:</strong> {{ driver.name }} </v-col>
-          <v-col cols="12" sm="6"> <strong>Возраст:</strong> {{ driver.age }} </v-col>
-          <v-col cols="12" sm="6"> <strong>Стаж:</strong> {{ driver.experience }} лет </v-col>
-          <v-col cols="12" sm="6"> <strong>Контактный номер:</strong> {{ driver.phone }} </v-col>
-          <v-col cols="12">
-            <strong>Описание:</strong>
-            <p>{{ driver.description }}</p>
-          </v-col>
+          <v-col cols="12" sm="6"><strong>Фамилия:</strong> {{ driver.lastName }}</v-col>
+          <v-col cols="12" sm="6"><strong>Имя:</strong> {{ driver.firstName }}</v-col>
+          <v-col cols="12" sm="6"><strong>Отчество:</strong> {{ driver.middleName }}</v-col>
+          <v-col cols="12" sm="6"><strong>Табельный номер:</strong> {{ driver.staffNumber }}</v-col>
+          <v-col cols="12" sm="6"
+            ><strong>Вод. удостоверение:</strong> {{ driver.licenseNumber }}</v-col
+          >
+          <v-col cols="12" sm="6"><strong>Дата рождения:</strong> {{ driver.birthDate }}</v-col>
         </v-row>
       </v-card-text>
       <v-card-actions>
@@ -28,18 +28,19 @@ export default {
   data() {
     return {
       driver: {
-        name: 'Иван Иванов',
-        age: 45,
-        experience: 20,
-        phone: '+7 900 123-45-67',
-        description: 'Опытный водитель с многолетним стажем работы на дальних маршрутах.',
+        lastName: 'Иванов',
+        firstName: 'Иван',
+        middleName: 'Иванович',
+        staffNumber: '12345',
+        licenseNumber: '7700999888',
+        birthDate: '1980-01-15',
       },
     }
   },
   methods: {
     logout() {
       // Логика выхода из системы
-      this.$router.push('/login') // Перенаправление на страницу входа
+      this.$router.push('/login')
     },
   },
 }

@@ -2,64 +2,72 @@
   <v-container>
     <v-row>
       <v-col cols="12" md="4">
-        <v-menu
-          v-model="menu"
-          :close-on-content-click="false"
-          transition="scale-transition"
-          offset-y
-          max-width="290px"
-          min-width="290px"
-        >
-          <template v-slot:activator="{ props }">
-            <v-text-field
-              v-model="selectedDate"
-              label="Выберите дату"
-              prepend-icon="mdi-calendar"
-              readonly
-              v-bind="props"
-            ></v-text-field>
-          </template>
-          <v-date-picker v-model="selectedDate" @input="menu = false"></v-date-picker>
-        </v-menu>
+        <v-text-field
+          v-model="selectedDate"
+          type="date"
+          label="Выберите дату"
+          density="comfortable"
+          variant="outlined"
+        ></v-text-field>
       </v-col>
     </v-row>
+
     <v-row>
-      <v-col cols="12">
-        <v-list>
-          <v-list-item
-            v-for="(trip, index) in filteredTrips"
-            :key="index"
-            :to="{ name: 'trip-details', params: { tripIdParam: index } }"
-          >
-            <v-list-item-title>{{ trip.name }}</v-list-item-title>
-            <v-list-item-subtitle>{{ trip.time }}</v-list-item-subtitle>
-          </v-list-item>
-        </v-list>
+      <v-col cols="12" v-if="filteredTrips?.length">
+        <v-card
+          v-for="(trip, index) in filteredTrips"
+          :key="index"
+          class="mb-3"
+          :to="{ name: 'trip-details', params: { tripIdParam: trip.id } }"
+          hover
+          color="blue-grey-lighten-5"
+        >
+          <v-card-title class="d-flex justify-space-between align-center">
+            <div class="text-subtitle-1 font-weight-medium">
+              {{ trip.route.name }}
+            </div>
+          </v-card-title>
+
+          <v-card-text>
+            <div><strong>Дата:</strong> {{ trip.departureDate }}</div>
+            <div><strong>Время отправления:</strong> {{ trip.schedule.departureTime }}</div>
+          </v-card-text>
+        </v-card>
+      </v-col>
+
+      <v-col cols="12" v-else-if="!loadingStore.loading">
+        <v-alert type="info" border="start" variant="tonal" color="blue">
+          Рейсы не найдены на выбранную дату.
+        </v-alert>
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script lang="ts">
+import { useLoadingStore } from '@/stores/loadingStore'
+import { tripsApi } from '../api/tripsApi'
+import type { ITrip } from '../interfaces/trip'
+
 export default {
   data() {
     return {
-      menu: false,
-      selectedDate: null,
-      trips: [
-        { name: 'Рейс 1', time: '10:00', date: '2025-04-03' },
-        { name: 'Рейс 2', time: '12:00', date: '2025-04-03' },
-        { name: 'Рейс 3', time: '14:00', date: '2025-04-04' },
-      ],
+      selectedDate: null as string | null,
+      trips: null as null | ITrip[],
+      loadingStore: useLoadingStore(),
     }
   },
   computed: {
-    filteredTrips() {
-      if (!this.selectedDate) return this.trips
-      return this.trips.filter((trip) => trip.date === this.selectedDate)
+    filteredTrips(): ITrip[] | null {
+      if (!this.trips) return null
+      const today = new Date().toISOString().split('T')[0] // формат YYYY-MM-DD
+      const actualTrips = this.trips.filter((trip) => trip.departureDate >= today)
+      if (!this.selectedDate) return actualTrips
+      return actualTrips.filter((trip) => trip.departureDate === this.selectedDate)
     },
+  },
+  async mounted() {
+    this.trips = (await tripsApi.getMyTrips()).data
   },
 }
 </script>
-
-<style scoped></style>
